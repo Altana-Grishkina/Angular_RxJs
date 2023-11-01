@@ -5,7 +5,7 @@ import { ProductCategory } from '../product-categories/product-category';
 
 import { Product } from './product';
 import { ProductService } from './product.service';
-import { EMPTY, Observable, catchError } from 'rxjs';
+import { EMPTY, Observable, catchError, filter, map } from 'rxjs';
 
 @Component({
   templateUrl: './product-list.component.html',
@@ -16,6 +16,7 @@ export class ProductListComponent {
   pageTitle = 'Product List';
   errorMessage = '';
   categories: ProductCategory[] = [];
+  selectedCategoryId = 1;
 
   products$ = this.productService.productsWithCategory$
   .pipe(
@@ -25,6 +26,14 @@ export class ProductListComponent {
     })
   );
 
+  productsSimpleFilter$ = this.productService.productsWithCategory$
+    .pipe(
+      // filter(item => item.categoryId === this.selectedCategoryId)
+      map(products =>
+        products.filter(product =>
+          this.selectedCategoryId ? product.categoryId === this.selectedCategoryId : true)
+      )
+    );
   constructor(private productService: ProductService) { }
 
   onAdd(): void {
