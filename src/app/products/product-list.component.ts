@@ -5,7 +5,7 @@ import { ProductCategory } from '../product-categories/product-category';
 
 import { Product } from './product';
 import { ProductService } from './product.service';
-import { EMPTY, Observable, Subject, catchError, combineLatest, filter, map } from 'rxjs';
+import { BehaviorSubject, EMPTY, Observable, Subject, catchError, combineLatest, filter, map, startWith } from 'rxjs';
 import { ProductCategoryService } from '../product-categories/product-category.service';
 
 @Component({
@@ -17,7 +17,7 @@ export class ProductListComponent {
   pageTitle = 'Product List';
   errorMessage = '';
 
-  private categorySelectedSubject = new Subject<number>();
+  private categorySelectedSubject = new BehaviorSubject<number>(0);
   categorySlectedAction$ = this.categorySelectedSubject.asObservable();
 
   products$ = combineLatest([
