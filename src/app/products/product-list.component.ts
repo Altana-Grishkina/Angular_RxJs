@@ -5,7 +5,7 @@ import { ProductCategory } from '../product-categories/product-category';
 
 import { Product } from './product';
 import { ProductService } from './product.service';
-import { EMPTY, Observable, catchError, filter, map } from 'rxjs';
+import { EMPTY, Observable, Subject, catchError, combineLatest, filter, map } from 'rxjs';
 import { ProductCategoryService } from '../product-categories/product-category.service';
 
 @Component({
@@ -16,10 +16,19 @@ import { ProductCategoryService } from '../product-categories/product-category.s
 export class ProductListComponent {
   pageTitle = 'Product List';
   errorMessage = '';
-  selectedCategoryId = 1;
 
-  products$ = this.productService.productsWithCategory$
+  private categorySelectedSubject = new Subject<number>();
+  categorySlectedAction$ = this.categorySelectedSubject.asObservable();
+
+  products$ = combineLatest([
+    this.productService.productsWithCategory$,
+    this.categorySlectedAction$
+  ])
   .pipe(
+    map(([products, selectedCategoryId]) =>
+    products.filter(product =>
+      selectedCategoryId ? product.categoryId === selectedCategoryId : true)
+    ),
     catchError(err => {
       this.errorMessage = err;
       return EMPTY;
@@ -34,14 +43,7 @@ export class ProductListComponent {
       })
     );
 
-  productsSimpleFilter$ = this.productService.productsWithCategory$
-    .pipe(
-      // filter(item => item.categoryId === this.selectedCategoryId)
-      map(products =>
-        products.filter(product =>
-          this.selectedCategoryId ? product.categoryId === this.selectedCategoryId : true)
-      )
-    );
+
   constructor(private productService: ProductService,
               private productCategoryService : ProductCategoryService) { }
 
@@ -50,6 +52,6 @@ export class ProductListComponent {
   }
 
   onSelected(categoryId: string): void {
-    this.selectedCategoryId = +categoryId;
+    this.categorySelectedSubject.next(+categoryId);
   }
 }
