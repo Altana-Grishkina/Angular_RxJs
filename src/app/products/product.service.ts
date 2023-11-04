@@ -50,12 +50,12 @@ export class ProductService {
 
   productsWithAdd$ = merge(
     this.productsWithCategory$,
-    this.productInsertedAction$
+    this.productInsertedAction$)
     .pipe(
       scan((acc, value) =>
       (value instanceof Array) ? [...value] : [...acc, value], [] as Product[])
     )
-  )
+
 
   constructor(private http: HttpClient, private productCategoryService: ProductCategoryService) { }
 
